@@ -14,8 +14,10 @@ export const LeadModal: React.FC<LeadModalProps> = ({ isOpen, onClose, title = "
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ name?: boolean; phone?: boolean }>({});
+  const [okMsg, setOkMsg] = useState('');
+  const [errMsg, setErrMsg] = useState('');
 
-  if (!isOpen) return null;
+
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value.replace(/\D/g, ''); // Remove non-digits
@@ -39,6 +41,7 @@ export const LeadModal: React.FC<LeadModalProps> = ({ isOpen, onClose, title = "
     if (errors.phone) setErrors(prev => ({ ...prev, phone: false }));
   };
 
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -52,20 +55,54 @@ export const LeadModal: React.FC<LeadModalProps> = ({ isOpen, onClose, title = "
       return;
     }
 
+    
+
     setLoading(true);
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    setLoading(false);
-    onClose();
-    toast.success('Спасибо! Мы уже готовим информацию по вашему авто');
-    
-    // Reset form
-    setName('');
-    setPhone('+7 (');
-    setEmail('');
+setErrMsg('');
+setOkMsg('');
+
+try {
+  const segment = window.location.pathname.includes('park') ? 'park' : 'driver';
+
+  const r = await fetch('/api/lead', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name: name.trim(),
+      phone: phone.trim(),
+      segment,
+      source: window.location.href,
+      message: `Email: ${email || '—'}`,
+      hp: ''
+    }),
+  });
+
+  const data = await r.json().catch(() => ({}));
+
+  if (!r.ok || !data?.ok) {
+    setErrMsg(data?.error || 'Ошибка отправки');
+    toast.error(data?.error || 'Ошибка отправки');
+    return;
+  }
+
+  setOkMsg('Заявка отправлена! Мы скоро свяжемся.');
+  toast.success('Спасибо! Заявка отправлена.');
+  onClose();
+
+  // Reset form
+  setName('');
+  setPhone('+7 (');
+  setEmail('');
+} catch (e) {
+  setErrMsg('Ошибка сети. Попробуйте ещё раз.');
+  toast.error('Ошибка сети. Попробуйте ещё раз.');
+} finally {
+  setLoading(false);
+}
+
   };
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
