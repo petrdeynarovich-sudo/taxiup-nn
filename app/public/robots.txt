@@ -1,5 +1,3 @@
 User-agent: *
 Allow: /
-
-Sitemap: https://taxiup.online/sitemap.xml
-Host: taxiup.online
+Sitemap: https://www.taxiup.online/sitemap.xml

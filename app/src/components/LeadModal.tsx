@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, Loader2 } from 'lucide-react';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 
 interface LeadModalProps {
   isOpen: boolean;
@@ -16,6 +16,8 @@ export const LeadModal: React.FC<LeadModalProps> = ({ isOpen, onClose, title = "
   const [errors, setErrors] = useState<{ name?: boolean; phone?: boolean }>({});
   const [okMsg, setOkMsg] = useState('');
   const [errMsg, setErrMsg] = useState('');
+  const [hp, setHp] = useState('');
+
 
 
 
@@ -73,7 +75,7 @@ try {
       segment,
       source: window.location.href,
       message: `Email: ${email || '—'}`,
-      hp: ''
+      hp: hp
     }),
   });
 
@@ -159,13 +161,24 @@ try {
             />
           </div>
 
-          <button
+           <button
             type="submit"
             disabled={loading}
             className="w-full bg-yellow-400 hover:bg-yellow-300 text-black font-black uppercase text-lg py-4 rounded-lg mt-4 shadow-lg hover:shadow-yellow-400/20 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
-          >
+           >
             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Отправить заявку'}
-          </button>
+           </button>
+           <div style={{ position: 'absolute', left: '-10000px', top: 'auto', width: 1, height: 1, overflow: 'hidden' }}>
+           <label>Не заполнять</label>
+           <input
+           name="hp"
+           value={hp}
+           onChange={(e) => setHp(e.target.value)}
+           autoComplete="off"
+           tabIndex={-1}
+           />
+           </div>
+
         </form>
       </div>
     </div>
